@@ -1,8 +1,6 @@
 import 'dart:async';
 import 'dart:io';
 import 'dart:ui' as ui;
-
-import 'package:canvas_record_app/main.dart';
 import 'package:canvas_record_app/view/drawing_canvas.dart/models/drawing_mode.dart';
 import 'package:canvas_record_app/view/drawing_canvas.dart/models/sketch.dart';
 import 'package:canvas_record_app/view/drawing_canvas.dart/widgets/color_palette.dart';
@@ -16,6 +14,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:universal_html/html.dart' as html;
 import 'package:url_launcher/url_launcher.dart';
+import 'package:canvas_record_app/record/record_screen.dart';
 
 class CanvasSideBar extends HookWidget {
   final ValueNotifier<Color> selectedColor;
@@ -262,10 +261,7 @@ class CanvasSideBar extends HookWidget {
                         : 'Remove Background',
                   ),
                 ),
-                TextButton(
-                  child: const Text('Fork on Github'),
-                  onPressed: () => _launchUrl(kGithubRepo),
-                ),
+                const RecordScreen()
               ],
             ),
             const SizedBox(height: 20),
@@ -297,17 +293,6 @@ class CanvasSideBar extends HookWidget {
                   ),
                 ),
               ],
-            ),
-            // add about me button or follow buttons
-            const Divider(),
-            Center(
-              child: GestureDetector(
-                onTap: () => _launchUrl('https://github.com/JideGuru'),
-                child: const Text(
-                  'Made with 💙 by JideGuru',
-                  style: TextStyle(fontSize: 12),
-                ),
-              ),
             ),
           ],
         ),

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:flutter_svg/svg.dart';
 
 class ColorPalette extends HookWidget {
   final ValueNotifier<Color> selectedColor;
@@ -65,19 +64,19 @@ class ColorPalette extends HookWidget {
               ),
             ),
             const SizedBox(width: 10),
-            MouseRegion(
-              cursor: SystemMouseCursors.click,
-              child: GestureDetector(
-                onTap: () {
-                  showColorWheel(context, selectedColor);
-                },
-                child: SvgPicture.asset(
-                  'assets/svgs/color_wheel.svg',
-                  height: 30,
-                  width: 30,
-                ),
-              ),
-            ),
+            // MouseRegion(
+            //   cursor: SystemMouseCursors.click,
+            //   child: GestureDetector(
+            //     onTap: () {
+            //       showColorWheel(context, selectedColor);
+            //     },
+            //     child: SvgPicture.asset(
+            //       'assets/svgs/color_wheel.svg',
+            //       height: 30,
+            //       width: 30,
+            //     ),
+            //   ),
+            // ),
           ],
         ),
       ],
