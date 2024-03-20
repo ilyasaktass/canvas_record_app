@@ -261,7 +261,7 @@ class CanvasSideBar extends HookWidget {
                         : 'Remove Background',
                   ),
                 ),
-                const RecordScreen()
+                 RecordScreen(canvasGlobalKey:canvasGlobalKey)
               ],
             ),
             const SizedBox(height: 20),
