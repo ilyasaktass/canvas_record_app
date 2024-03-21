@@ -8,9 +8,11 @@ import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:open_file/open_file.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:ffmpeg_kit_flutter/ffmpeg_kit.dart';
 
 class RecordScreen extends StatefulWidget {
-  const RecordScreen({Key? key, required this.canvasGlobalKey}) : super(key: key);
+  const RecordScreen({Key? key, required this.canvasGlobalKey})
+      : super(key: key);
 
   final GlobalKey canvasGlobalKey;
 
@@ -20,112 +22,177 @@ class RecordScreen extends StatefulWidget {
 
 class _RecordScreenState extends State<RecordScreen> {
   EdScreenRecorder? screenRecorder;
-  RecordOutput? _response;
-  bool inProgress = false;
-
+  var _fileName = '';
+  bool isRecording = false;
+  bool isPaused = false;
+  CanvasPosition? _canvasPosition;
   @override
   void initState() {
     super.initState();
     screenRecorder = EdScreenRecorder();
   }
 
-  Future<void> startRecord({required String fileName, required int width, required int height}) async {
+  Future<void> startRecord({required int width, required int height}) async {
     try {
-      RenderRepaintBoundary boundary = widget.canvasGlobalKey.currentContext!.findRenderObject() as RenderRepaintBoundary;
+      RenderRepaintBoundary boundary = widget.canvasGlobalKey.currentContext!
+          .findRenderObject() as RenderRepaintBoundary;
+      Offset position = boundary!.localToGlobal(Offset.zero);
 
-      String dirPath = await (await getTemporaryDirectory()).path;
+      double xPosition = position.dx;
+      double yPosition = position.dy;
+      double height = boundary!.size.height;
+      double width = boundary!.size.width;
+      final fileName = 'video_${DateTime.now().millisecond}';
+      String dirPath = (await getTemporaryDirectory()).path;
       if (await Permission.storage.request().isGranted) {
-        var startResponse = await screenRecorder?.startRecordScreen(
+        await screenRecorder?.startRecordScreen(
           fileName: fileName,
           audioEnable: true,
-          width: boundary.size.width.toInt(),
-          height: boundary.size.height.toInt(),
+          width: width.toInt(),
+          height: height.toInt(),
           dirPathToSave: dirPath,
         );
         setState(() {
-          _response = startResponse;
+          _fileName = fileName;
+          isRecording = true;
+          _canvasPosition = CanvasPosition(xPosition, yPosition, width, height);
         });
       } else {
-        // İzin reddedildiğinde yapılacak işlemleri burada gerçekleştirin
+        // Handle when permission is denied
       }
     } on PlatformException {
-      kDebugMode ? debugPrint("Hata: Kayıt başlatılırken bir hata oluştu!") : null;
+      kDebugMode
+          ? debugPrint("Error: An error occurred while starting recording.")
+          : null;
     }
   }
 
   Future<void> stopRecord() async {
-    const fileName = "ilyas";
     try {
       var stopResponse = await screenRecorder?.stopRecord();
       if (stopResponse != null) {
         File file = File(stopResponse.file.path);
-        // Dosya yoksa varsayılan yolu kullanın
         if (!await file.exists()) {
-          Directory? directory = await getExternalStorageDirectory();
-          String path = '${directory!.path}/$fileName.mp4';
-          file = File(path);
+          debugPrint("File does not exist.");
+          return;
         }
-        // Dosyayı kaydedin
-        Uint8List bytes = await stopResponse.file.readAsBytes();
-        if (await file.exists()) {
-          await file.writeAsBytes(bytes);
-          // Dosyayı aç
-          OpenFile.open(file.path);
-        } else {
-          debugPrint("Dosya bulunamadı: ${file.path}");
-        }
-        setState(() {
-          _response = stopResponse;
+
+        Directory? directory = await getExternalStorageDirectory();
+        final String outputPath = '${directory!.path}/${_fileName}.mp4';
+
+        // Crop command example: crop=width:height:x:y
+        final String cropCommand =
+            "-i ${file.path} -filter:v \"crop=${_canvasPosition!.width}:${_canvasPosition!.height}:${_canvasPosition!.x}:${_canvasPosition!.y}\" $outputPath";
+
+        await FFmpegKit.execute(cropCommand).then((session) async {
+          final returnCode = await session.getReturnCode();
+          File outputFile = File(outputPath);
+          bool fileExists = await outputFile.exists();
+          if (fileExists) {
+            debugPrint("Dosya zaten mevcut: $outputPath");
+          } else {
+            debugPrint("Dosya mevcut değil: $outputPath");
+          }
+
+          OpenFile.open(outputPath);
         });
       } else {
-        kDebugMode ? debugPrint("Hata: Dosya mevcut değil.") : null;
+        debugPrint("Error: File not available.");
       }
     } on PlatformException catch (e) {
-      kDebugMode ? debugPrint("Hata: Kayıt durdurulurken bir hata oluştu. $e") : null;
+      kDebugMode
+          ? debugPrint("Error: An error occurred while stopping recording. $e")
+          : null;
     }
+    setState(() {
+      isRecording = false;
+    });
   }
 
   Future<void> pauseRecord() async {
     try {
       await screenRecorder?.pauseRecord();
     } on PlatformException {
-      kDebugMode ? debugPrint("Error: An error occurred while pause recording.") : null;
+      kDebugMode
+          ? debugPrint("Error: An error occurred while pausing recording.")
+          : null;
     }
+    setState(() {
+      isPaused = true;
+    });
   }
 
   Future<void> resumeRecord() async {
     try {
       await screenRecorder?.resumeRecord();
     } on PlatformException {
-      kDebugMode ? debugPrint("Error: An error occurred while resume recording.") : null;
+      kDebugMode
+          ? debugPrint("Error: An error occurred while resuming recording.")
+          : null;
     }
+    setState(() {
+      isPaused = false;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Text("File: ${_response?.file.path}"),
-        Text("Status: ${_response?.success.toString()}"),
-        Text("Event: ${_response?.eventName}"),
-        Text("Progress: ${_response?.isProgress.toString()}"),
-        Text("Message: ${_response?.message}"),
-        Text("Video Hash: ${_response?.videoHash}"),
-        Text("Start Date: ${(_response?.startDate).toString()}"),
-        Text("End Date: ${(_response?.endDate).toString()}"),
-        ElevatedButton(
-          onPressed: () => startRecord(
-            fileName: "ilyas",
-            width: context.size?.width.toInt() ?? 0,
-            height: context.size?.height.toInt() ?? 0,
+    return SizedBox(
+      child: Column(
+        children: [
+          const Row(
+            children: [
+              Text(
+                'Records',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+            ],
           ),
-          child: const Text('START RECORD'),
-        ),
-        ElevatedButton(onPressed: () => resumeRecord(), child: const Text('RESUME RECORD')),
-        ElevatedButton(onPressed: () => pauseRecord(), child: const Text('PAUSE RECORD')),
-        ElevatedButton(onPressed: () => stopRecord(), child: const Text('STOP RECORD')),
-      ],
+          const Divider(),
+          Row(
+            children: [
+              IconButton(
+                onPressed: () => startRecord(
+                  width: context.size?.width.toInt() ?? 0,
+                  height: context.size?.height.toInt() ?? 0,
+                ),
+                icon: const Icon(Icons.video_call),
+                color: Colors.red,
+                tooltip: 'Start Recording',
+              ),
+              IconButton(
+                onPressed: () => pauseRecord(),
+                icon: const Icon(Icons.pause),
+                color: Colors.blue,
+                tooltip: 'Pause',
+              ),
+              IconButton(
+                onPressed: () => resumeRecord(),
+                icon: const Icon(Icons.play_arrow),
+                color: Colors.blue,
+                tooltip: 'Resume',
+              ),
+              isRecording
+                  ? IconButton(
+                      onPressed: () => stopRecord(),
+                      icon: const Icon(Icons.stop),
+                      color: Colors.red,
+                      tooltip: 'Stop',
+                    )
+                  : const SizedBox()
+            ],
+          )
+        ],
+      ),
     );
   }
+}
+
+class CanvasPosition {
+  double x;
+  double y;
+  double width;
+  double height;
+
+  CanvasPosition(this.x, this.y, this.width, this.height);
 }

@@ -34,6 +34,7 @@ class DrawingPage extends HookWidget {
       body: Stack(
         children: [
           Container(
+            padding: const EdgeInsets.fromLTRB(20,70,20,70),
             color: kCanvasColor,
             width: double.maxFinite,
             height: double.maxFinite,

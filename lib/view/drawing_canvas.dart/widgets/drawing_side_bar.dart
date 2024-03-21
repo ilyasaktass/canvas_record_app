@@ -148,7 +148,6 @@ class CanvasSideBar extends HookWidget {
                 ),
               ],
             ),
-
             AnimatedSwitcher(
               duration: const Duration(milliseconds: 150),
               child: drawingMode.value == DrawingMode.polygon
@@ -261,37 +260,7 @@ class CanvasSideBar extends HookWidget {
                         : 'Remove Background',
                   ),
                 ),
-                 RecordScreen(canvasGlobalKey:canvasGlobalKey)
-              ],
-            ),
-            const SizedBox(height: 20),
-            const Text(
-              'Export',
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-            const Divider(),
-            Row(
-              children: [
-                SizedBox(
-                  width: 140,
-                  child: TextButton(
-                    child: const Text('Export PNG'),
-                    onPressed: () async {
-                      Uint8List? pngBytes = await getBytes();
-                      if (pngBytes != null) saveFile(pngBytes, 'png');
-                    },
-                  ),
-                ),
-                SizedBox(
-                  width: 140,
-                  child: TextButton(
-                    child: const Text('Export JPEG'),
-                    onPressed: () async {
-                      Uint8List? pngBytes = await getBytes();
-                      if (pngBytes != null) saveFile(pngBytes, 'jpeg');
-                    },
-                  ),
-                ),
+                RecordScreen(canvasGlobalKey: canvasGlobalKey)
               ],
             ),
           ],
