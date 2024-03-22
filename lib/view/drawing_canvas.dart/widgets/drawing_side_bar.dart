@@ -27,6 +27,7 @@ class CanvasSideBar extends HookWidget {
   final ValueNotifier<bool> filled;
   final ValueNotifier<int> polygonSides;
   final ValueNotifier<ui.Image?> backgroundImage;
+   final GlobalKey safeAreaKey;
 
   const CanvasSideBar({
     Key? key,
@@ -40,6 +41,7 @@ class CanvasSideBar extends HookWidget {
     required this.filled,
     required this.polygonSides,
     required this.backgroundImage,
+    required this.safeAreaKey
   }) : super(key: key);
 
   @override
@@ -260,7 +262,7 @@ class CanvasSideBar extends HookWidget {
                         : 'Remove Background',
                   ),
                 ),
-                RecordScreen(canvasGlobalKey: canvasGlobalKey)
+                RecordScreen(canvasGlobalKey: canvasGlobalKey, safeAreaKey:safeAreaKey)
               ],
             ),
           ],

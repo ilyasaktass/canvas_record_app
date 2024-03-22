@@ -22,7 +22,7 @@ class DrawingPage extends HookWidget {
     final backgroundImage = useState<Image?>(null);
 
     final canvasGlobalKey = GlobalKey();
-
+    final safeAreaKey = GlobalKey();
     ValueNotifier<Sketch?> currentSketch = useState(null);
     ValueNotifier<List<Sketch>> allSketches = useState([]);
 
@@ -31,44 +31,25 @@ class DrawingPage extends HookWidget {
       initialValue: 1,
     );
     return Scaffold(
-      body: Stack(
-        children: [
-          Container(
-            padding: const EdgeInsets.fromLTRB(20,70,20,70),
-            color: kCanvasColor,
-            width: double.maxFinite,
-            height: double.maxFinite,
-            child: DrawingCanvas(
-              width: MediaQuery.of(context).size.width,
-              height: MediaQuery.of(context).size.height,
-              drawingMode: drawingMode,
-              selectedColor: selectedColor,
-              strokeSize: strokeSize,
-              eraserSize: eraserSize,
-              sideBarController: animationController,
-              currentSketch: currentSketch,
-              allSketches: allSketches,
-              canvasGlobalKey: canvasGlobalKey,
-              filled: filled,
-              polygonSides: polygonSides,
-              backgroundImage: backgroundImage,
-            ),
-          ),
-          Positioned(
-
-            
-            top: kToolbarHeight + 30,
-            // left: -5,
-            child: SlideTransition(
-              position: Tween<Offset>(
-                begin: const Offset(-1, 0),
-                end: Offset.zero,
-              ).animate(animationController),
-              child: CanvasSideBar(
+      body: SafeArea(
+        left: true,
+        right: true,
+        top: true,
+        bottom: true,
+        child: Stack(
+          children: [
+            Container(
+              color: kCanvasColor,
+              width: double.maxFinite,
+              height: double.maxFinite,
+              child: DrawingCanvas(
+                width: MediaQuery.of(context).size.width,
+                height: MediaQuery.of(context).size.height,
                 drawingMode: drawingMode,
                 selectedColor: selectedColor,
                 strokeSize: strokeSize,
                 eraserSize: eraserSize,
+                sideBarController: animationController,
                 currentSketch: currentSketch,
                 allSketches: allSketches,
                 canvasGlobalKey: canvasGlobalKey,
@@ -77,14 +58,35 @@ class DrawingPage extends HookWidget {
                 backgroundImage: backgroundImage,
               ),
             ),
-          ),
-          Positioned(
-            top: 30,
-            child: 
-                    _CustomAppBar(animationController: animationController),
-
-          )
-        ],
+            Positioned(
+              top: kToolbarHeight + 30,
+              // left: -5,
+              child: SlideTransition(
+                position: Tween<Offset>(
+                  begin: const Offset(-1, 0),
+                  end: Offset.zero,
+                ).animate(animationController),
+                child: CanvasSideBar(
+                  drawingMode: drawingMode,
+                  selectedColor: selectedColor,
+                  strokeSize: strokeSize,
+                  eraserSize: eraserSize,
+                  currentSketch: currentSketch,
+                  allSketches: allSketches,
+                  canvasGlobalKey: canvasGlobalKey,
+                  filled: filled,
+                  polygonSides: polygonSides,
+                  backgroundImage: backgroundImage,
+                  safeAreaKey: safeAreaKey,
+                ),
+              ),
+            ),
+            Positioned(
+              top: 30,
+              child: _CustomAppBar(animationController: animationController),
+            )
+          ],
+        ),
       ),
     );
   }
@@ -103,7 +105,6 @@ class _CustomAppBar extends StatelessWidget {
       width: double.maxFinite,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-        
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
