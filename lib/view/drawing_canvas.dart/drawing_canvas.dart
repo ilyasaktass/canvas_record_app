@@ -40,21 +40,30 @@ class DrawingCanvas extends HookWidget {
   }) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
+Widget build(BuildContext context) {
     return MouseRegion(
       cursor: SystemMouseCursors.precise,
       child: Stack(
         children: [
           buildAllSketches(context),
           buildCurrentPath(context),
+          Positioned.fill(
+            child: Listener(
+              onPointerDown: (details) => onPointerDown(details, context),
+              onPointerMove: (details) => onPointerMove(details, context),
+              onPointerUp: onPointerUp,
+            ),
+          ),
         ],
       ),
     );
   }
 
+
   void onPointerDown(PointerDownEvent details, BuildContext context) {
     final box = context.findRenderObject() as RenderBox;
     final offset = box.globalToLocal(details.position);
+    if (!_isInsideCanvas(offset)) return;
     currentSketch.value = Sketch.fromDrawingMode(
       Sketch(
         points: [offset],
@@ -70,29 +79,35 @@ class DrawingCanvas extends HookWidget {
       filled.value,
     );
   }
-
-  void onPointerMove(PointerMoveEvent details, BuildContext context) {
-    final box = context.findRenderObject() as RenderBox;
-    final offset = box.globalToLocal(details.position);
-    final points = List<Offset>.from(currentSketch.value?.points ?? [])
-      ..add(offset);
-
-    currentSketch.value = Sketch.fromDrawingMode(
-      Sketch(
-        points: points,
-        size: drawingMode.value == DrawingMode.eraser
-            ? eraserSize.value
-            : strokeSize.value,
-        color: drawingMode.value == DrawingMode.eraser
-            ? kCanvasColor
-            : selectedColor.value,
-        sides: polygonSides.value,
-      ),
-      drawingMode.value,
-      filled.value,
-    );
+bool _isInsideCanvas(Offset offset) {
+  if (0 <= offset.dx && offset.dx <= width && 0 <= offset.dy && offset.dy <= height) {
+    return true;
   }
+  return false;
+}
+void onPointerMove(PointerMoveEvent details, BuildContext context) {
+  final box = context.findRenderObject() as RenderBox;
+  final offset = box.globalToLocal(details.position);
+  if (!_isInsideCanvas(offset)) return;
 
+  // Get the drawing points
+  final points = List<Offset>.from(currentSketch.value?.points ?? [])..add(offset);
+
+  // If the new point exceeds the canvas boundaries or underflows, exit without doing the next operations
+  if (!_isInsideCanvas(points.last)) return;
+
+  // Update the new drawing points
+  currentSketch.value = Sketch.fromDrawingMode(
+    Sketch(
+      points: points,
+      size: drawingMode.value == DrawingMode.eraser ? eraserSize.value : strokeSize.value,
+      color: drawingMode.value == DrawingMode.eraser ? kCanvasColor : selectedColor.value,
+      sides: polygonSides.value,
+    ),
+    drawingMode.value,
+    filled.value,
+  );
+}
   void onPointerUp(PointerUpEvent details) {
     allSketches.value = List<Sketch>.from(allSketches.value)
       ..add(currentSketch.value!);
@@ -122,9 +137,7 @@ class DrawingCanvas extends HookWidget {
           return RepaintBoundary(
             key: canvasGlobalKey,
             child: Container(
-              height: height,
-              width: width,
-              color: kCanvasColor,
+                color: Colors.red,
               child: CustomPaint(
                 painter: SketchPainter(
                   sketches: sketches,

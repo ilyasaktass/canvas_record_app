@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:canvas_record_app/main.dart';
+import 'package:canvas_record_app/record/record_screen.dart';
 import 'package:canvas_record_app/view/drawing_canvas.dart/drawing_canvas.dart';
 import 'package:canvas_record_app/view/drawing_canvas.dart/models/drawing_mode.dart';
 import 'package:canvas_record_app/view/drawing_canvas.dart/models/sketch.dart';
@@ -20,9 +21,9 @@ class DrawingPage extends HookWidget {
     final filled = useState<bool>(false);
     final polygonSides = useState<int>(3);
     final backgroundImage = useState<Image?>(null);
-
+    
     final canvasGlobalKey = GlobalKey();
-    final safeAreaKey = GlobalKey();
+    ;
     ValueNotifier<Sketch?> currentSketch = useState(null);
     ValueNotifier<List<Sketch>> allSketches = useState([]);
 
@@ -30,21 +31,41 @@ class DrawingPage extends HookWidget {
       duration: const Duration(milliseconds: 150),
       initialValue: 1,
     );
+    final canvasWidth = MediaQuery.of(context).size.width;
+    final canvasHeight = MediaQuery.of(context).size.height -
+        (kBottomNavigationBarHeight +
+            kToolbarHeight +
+            MediaQuery.of(context).padding.top +
+            50);
     return Scaffold(
-      body: SafeArea(
-        left: true,
-        right: true,
-        top: true,
-        bottom: true,
-        child: Stack(
-          children: [
-            Container(
-              color: kCanvasColor,
+      appBar: AppBar(
+        title: Text('Screen Recording App'),
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        items: const <BottomNavigationBarItem>[
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: 'Home',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.business),
+            label: 'Business',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.school),
+            label: 'School',
+          ),
+        ],
+      ),
+      body: Column(
+        children: [
+          Expanded(
+            child: Container(
+              color: Colors.indigo,
               width: double.maxFinite,
-              height: double.maxFinite,
               child: DrawingCanvas(
-                width: MediaQuery.of(context).size.width,
-                height: MediaQuery.of(context).size.height,
+                width: canvasWidth,
+                height: canvasHeight,
                 drawingMode: drawingMode,
                 selectedColor: selectedColor,
                 strokeSize: strokeSize,
@@ -58,35 +79,21 @@ class DrawingPage extends HookWidget {
                 backgroundImage: backgroundImage,
               ),
             ),
-            Positioned(
-              top: kToolbarHeight + 30,
-              // left: -5,
-              child: SlideTransition(
-                position: Tween<Offset>(
-                  begin: const Offset(-1, 0),
-                  end: Offset.zero,
-                ).animate(animationController),
-                child: CanvasSideBar(
-                  drawingMode: drawingMode,
-                  selectedColor: selectedColor,
-                  strokeSize: strokeSize,
-                  eraserSize: eraserSize,
-                  currentSketch: currentSketch,
-                  allSketches: allSketches,
-                  canvasGlobalKey: canvasGlobalKey,
-                  filled: filled,
-                  polygonSides: polygonSides,
-                  backgroundImage: backgroundImage,
-                  safeAreaKey: safeAreaKey,
-                ),
-              ),
-            ),
-            Positioned(
-              top: 30,
-              child: _CustomAppBar(animationController: animationController),
-            )
-          ],
-        ),
+          ),
+           RecordScreen(canvasGlobalKey: canvasGlobalKey)
+          // CanvasSideBar(
+          //       drawingMode: drawingMode,
+          //       selectedColor: selectedColor,
+          //       strokeSize: strokeSize,
+          //       eraserSize: eraserSize,
+          //       currentSketch: currentSketch,
+          //       allSketches: allSketches,
+          //       canvasGlobalKey: canvasGlobalKey,
+          //       filled: filled,
+          //       polygonSides: polygonSides,
+          //       backgroundImage: backgroundImage,
+          //     ),
+        ],
       ),
     );
   }

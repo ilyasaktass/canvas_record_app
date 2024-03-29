@@ -14,11 +14,9 @@ class RecordScreen extends StatefulWidget {
   const RecordScreen({
     Key? key,
     required this.canvasGlobalKey,
-    required this.safeAreaKey,
   }) : super(key: key);
 
   final GlobalKey canvasGlobalKey;
-  final GlobalKey safeAreaKey;
 
   @override
   State<RecordScreen> createState() => _RecordScreenState();
@@ -66,6 +64,8 @@ class _RecordScreenState extends State<RecordScreen> {
   }
 
   Future<void> stopRecord() async {
+    RenderRepaintBoundary sized = widget.canvasGlobalKey.currentContext!
+        .findRenderObject() as RenderRepaintBoundary;
     try {
       var stopResponse = await _screenRecorder?.stopRecord();
       if (stopResponse != null) {
@@ -78,17 +78,20 @@ class _RecordScreenState extends State<RecordScreen> {
         Directory? directory = await getExternalStorageDirectory();
         final String outputPath = '${directory!.path}/$_fileName.mp4';
 
-        // Ekranın genişlik ve yükseklik bilgilerini alın
-        double screenWidth = MediaQuery.of(context).size.width;
-        double screenHeight = MediaQuery.of(context).size.height;
-
         // Ekranın üst ve altından 40 piksel bırakarak kırpma işlemi için gerekli değerleri hesaplayın
-        double cropWidth = screenWidth;
-        double cropHeight = screenHeight - 90;
+        double cropX =
+            sized.localToGlobal(Offset.zero).dx; // X koordinatı başlangıcı
+        double cropY =
+            sized.localToGlobal(Offset.zero).dy; // Y koordinatı başlangıcı
+        double cropWidth = sized.size.width;
+        double cropHeight = sized.size.height;
 
-        double cropX = 0; // X koordinatı başlangıcı
-        double cropY = 20; // Y koordinatı başlangıcı
-
+        double pageheight = MediaQuery.of(context).size.height;
+        double pageWidth = MediaQuery.of(context).size.width;
+        double statusBar = MediaQuery.of(context).padding.top;
+         OpenFile.open(file.path);
+        print(
+            'CanvasWidth:$cropWidth; CanvasHeight:$cropHeight; cropX:$cropX; cropY:$cropY;toolBarHeight:$kToolbarHeight;navigationBarHeight:$kBottomNavigationBarHeight;pageheight:$pageheight');
         // final String cropCommand =
         //     "-i ${file.path} -filter:v \"crop=$cropWidth:$cropHeight:$cropX:$cropY\" -c:v libx264 -preset slow -crf 18 $outputPath";
         final String cropCommand =
@@ -100,7 +103,7 @@ class _RecordScreenState extends State<RecordScreen> {
           final returnCode = await session.getReturnCode();
           debugPrint(await session.getOutput());
           if (returnCode!.isValueSuccess()) {
-            OpenFile.open(outputPath);
+            OpenFile.open(file.path);
           }
         });
       } else {
@@ -136,46 +139,41 @@ class _RecordScreenState extends State<RecordScreen> {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      child: Column(
-        children: [
-          const Text(
-            'Records',
-            style: TextStyle(fontWeight: FontWeight.bold),
+        height: 50,
+        child: ColoredBox(
+          color: Colors.pink,
+          child: Row(
+             
+                children: [
+          IconButton(
+            onPressed: () => startRecord(
+              width: context.size?.width.toInt() ?? 0,
+              height: context.size?.height.toInt() ?? 0,
+            ),
+            icon: const Icon(Icons.video_call),
+            color: Colors.red,
+            tooltip: 'Kaydı Başlat',
           ),
-          const Divider(),
-          Row(
-            children: [
-              IconButton(
-                onPressed: () => startRecord(
-                  width: context.size?.width.toInt() ?? 0,
-                  height: context.size?.height.toInt() ?? 0,
-                ),
-                icon: const Icon(Icons.video_call),
-                color: Colors.red,
-                tooltip: 'Kaydı Başlat',
-              ),
-              IconButton(
-                onPressed: () => pauseRecord(),
-                icon: const Icon(Icons.pause),
-                color: Colors.blue,
-                tooltip: 'Duraklat',
-              ),
-              IconButton(
-                onPressed: () => resumeRecord(),
-                icon: const Icon(Icons.play_arrow),
-                color: Colors.blue,
-                tooltip: 'Devam Ettir',
-              ),
-              IconButton(
-                onPressed: () => stopRecord(),
-                icon: const Icon(Icons.stop),
-                color: Colors.red,
-                tooltip: 'Durdur',
-              )
-            ],
+          IconButton(
+            onPressed: () => pauseRecord(),
+            icon: const Icon(Icons.pause),
+            color: Colors.blue,
+            tooltip: 'Duraklat',
+          ),
+          IconButton(
+            onPressed: () => resumeRecord(),
+            icon: const Icon(Icons.play_arrow),
+            color: Colors.blue,
+            tooltip: 'Devam Ettir',
+          ),
+          IconButton(
+            onPressed: () => stopRecord(),
+            icon: const Icon(Icons.stop),
+            color: Colors.red,
+            tooltip: 'Durdur',
           )
-        ],
-      ),
-    );
+                ],
+              ),
+        ));
   }
 }

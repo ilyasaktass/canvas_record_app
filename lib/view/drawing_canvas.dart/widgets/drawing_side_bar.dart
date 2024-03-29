@@ -27,7 +27,6 @@ class CanvasSideBar extends HookWidget {
   final ValueNotifier<bool> filled;
   final ValueNotifier<int> polygonSides;
   final ValueNotifier<ui.Image?> backgroundImage;
-   final GlobalKey safeAreaKey;
 
   const CanvasSideBar({
     Key? key,
@@ -41,7 +40,6 @@ class CanvasSideBar extends HookWidget {
     required this.filled,
     required this.polygonSides,
     required this.backgroundImage,
-    required this.safeAreaKey
   }) : super(key: key);
 
   @override
@@ -55,7 +53,7 @@ class CanvasSideBar extends HookWidget {
     final scrollController = useScrollController();
     return Container(
       width: 300,
-      height: MediaQuery.of(context).size.height < 680 ? 450 : 610,
+      height: MediaQuery.of(context).size.height < 680 ? 350 : 410,
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: const BorderRadius.horizontal(right: Radius.circular(10)),
@@ -262,7 +260,7 @@ class CanvasSideBar extends HookWidget {
                         : 'Remove Background',
                   ),
                 ),
-                RecordScreen(canvasGlobalKey: canvasGlobalKey, safeAreaKey:safeAreaKey)
+                RecordScreen(canvasGlobalKey: canvasGlobalKey)
               ],
             ),
           ],
