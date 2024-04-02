@@ -48,9 +48,9 @@ dependencies:
   permission_handler: ^11.3.0
   open_file: ^3.3.2
   ed_screen_recorder: ^0.0.14
-  ffmpeg_kit_flutter: ^6.0.3
   flutter_gemini: ^2.0.3
   flutter_screen_recording: ^2.0.10
+  ffmpeg_kit_flutter: ^6.0.3
 
 dev_dependencies:
   flutter_test:

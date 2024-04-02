@@ -5,15 +5,16 @@ import 'package:canvas_record_app/record/record_screen.dart';
 import 'package:canvas_record_app/view/drawing_canvas.dart/drawing_canvas.dart';
 import 'package:canvas_record_app/view/drawing_canvas.dart/models/drawing_mode.dart';
 import 'package:canvas_record_app/view/drawing_canvas.dart/models/sketch.dart';
-import 'package:canvas_record_app/view/drawing_canvas.dart/widgets/drawing_side_bar.dart';
 import 'package:flutter/material.dart' hide Image;
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:flutter/services.dart';
 
 class DrawingPage extends HookWidget {
   const DrawingPage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
     final selectedColor = useState(Colors.black);
     final strokeSize = useState<double>(10);
     final eraserSize = useState<double>(30);
@@ -21,7 +22,7 @@ class DrawingPage extends HookWidget {
     final filled = useState<bool>(false);
     final polygonSides = useState<int>(3);
     final backgroundImage = useState<Image?>(null);
-    
+
     final canvasGlobalKey = GlobalKey();
     ;
     ValueNotifier<Sketch?> currentSketch = useState(null);
@@ -31,56 +32,105 @@ class DrawingPage extends HookWidget {
       duration: const Duration(milliseconds: 150),
       initialValue: 1,
     );
-    final canvasWidth = MediaQuery.of(context).size.width;
-    final canvasHeight = MediaQuery.of(context).size.height -
-        (kBottomNavigationBarHeight +
-            kToolbarHeight +
-            MediaQuery.of(context).padding.top +
-            50);
+    final pageWidth = MediaQuery.of(context).size.width;
+    final pageHeight = MediaQuery.of(context).size.height;
+    const recordPageWidth = 56;
+    final canvasWidth =
+        MediaQuery.of(context).size.width;
+    final canvasHeight = MediaQuery.of(context).size.height;
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Screen Recording App'),
+      // appBar: AppBar(
+      //   title: Text('Screen Recording App'),
+      // ),
+      // bottomNavigationBar: BottomNavigationBar(
+      //   items: const <BottomNavigationBarItem>[
+      //     BottomNavigationBarItem(
+      //       icon: Icon(Icons.home),
+      //       label: 'Home',
+      //     ),
+      //     BottomNavigationBarItem(
+      //       icon: Icon(Icons.business),
+      //       label: 'Business',
+      //     ),
+      //     BottomNavigationBarItem(
+      //       icon: Icon(Icons.school),
+      //       label: 'School',
+      //     ),
+      //   ],
+      // ),
+      body: OrientationBuilder(
+        builder: (context, orientation) {
+          if (orientation == Orientation.landscape) {
+            return Row(
+              children: [
+                RecordScreen(
+                  canvasGlobalKey: canvasGlobalKey,
+                  recordPageWidth: recordPageWidth.toDouble(),
+                  pageWidth: pageWidth,
+                  pageHeight: pageHeight,
+                  orientation: orientation,
+                ),
+                Expanded(
+                  child: Container(
+                    color: kCanvasColor,
+                    width: pageWidth,
+                    child: DrawingCanvas(
+                      width: canvasWidth,
+                      height: canvasHeight,
+                      drawingMode: drawingMode,
+                      selectedColor: selectedColor,
+                      strokeSize: strokeSize,
+                      eraserSize: eraserSize,
+                      sideBarController: animationController,
+                      currentSketch: currentSketch,
+                      allSketches: allSketches,
+                      canvasGlobalKey: canvasGlobalKey,
+                      filled: filled,
+                      polygonSides: polygonSides,
+                      backgroundImage: backgroundImage,
+                    ),
+                  ),
+                ),
+              ],
+            );
+          } else {
+            return Column(
+              children: [
+              
+                Expanded(
+                  child: Container(
+                    color: kCanvasColor,
+                    width: pageWidth,
+                    child: DrawingCanvas(
+                      width: canvasWidth,
+                      height: canvasHeight,
+                      drawingMode: drawingMode,
+                      selectedColor: selectedColor,
+                      strokeSize: strokeSize,
+                      eraserSize: eraserSize,
+                      sideBarController: animationController,
+                      currentSketch: currentSketch,
+                      allSketches: allSketches,
+                      canvasGlobalKey: canvasGlobalKey,
+                      filled: filled,
+                      polygonSides: polygonSides,
+                      backgroundImage: backgroundImage,
+                    ),
+                    
+                  ),
+                ),
+                  RecordScreen(
+                  canvasGlobalKey: canvasGlobalKey,
+                  recordPageWidth: recordPageWidth.toDouble(),
+                  pageWidth: pageWidth,
+                  pageHeight: pageHeight,
+                  orientation: orientation,
+                ),
+              ],
+            );
+          }
+        },
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Home',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.business),
-            label: 'Business',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.school),
-            label: 'School',
-          ),
-        ],
-      ),
-      body: Column(
-        children: [
-          Expanded(
-            child: Container(
-              color: Colors.indigo,
-              width: double.maxFinite,
-              child: DrawingCanvas(
-                width: canvasWidth,
-                height: canvasHeight,
-                drawingMode: drawingMode,
-                selectedColor: selectedColor,
-                strokeSize: strokeSize,
-                eraserSize: eraserSize,
-                sideBarController: animationController,
-                currentSketch: currentSketch,
-                allSketches: allSketches,
-                canvasGlobalKey: canvasGlobalKey,
-                filled: filled,
-                polygonSides: polygonSides,
-                backgroundImage: backgroundImage,
-              ),
-            ),
-          ),
-           RecordScreen(canvasGlobalKey: canvasGlobalKey)
           // CanvasSideBar(
           //       drawingMode: drawingMode,
           //       selectedColor: selectedColor,
@@ -93,9 +143,7 @@ class DrawingPage extends HookWidget {
           //       polygonSides: polygonSides,
           //       backgroundImage: backgroundImage,
           //     ),
-        ],
-      ),
-    );
+      );
   }
 }
 

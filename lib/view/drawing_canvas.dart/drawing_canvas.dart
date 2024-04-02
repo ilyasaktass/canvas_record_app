@@ -131,13 +131,14 @@ void onPointerMove(PointerMoveEvent details, BuildContext context) {
     return SizedBox(
       height: height,
       width: width,
+      
       child: ValueListenableBuilder<List<Sketch>>(
         valueListenable: allSketches,
         builder: (context, sketches, _) {
           return RepaintBoundary(
             key: canvasGlobalKey,
+            
             child: Container(
-                color: Colors.red,
               child: CustomPaint(
                 painter: SketchPainter(
                   sketches: sketches,

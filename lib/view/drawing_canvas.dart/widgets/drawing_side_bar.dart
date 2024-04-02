@@ -260,7 +260,7 @@ class CanvasSideBar extends HookWidget {
                         : 'Remove Background',
                   ),
                 ),
-                RecordScreen(canvasGlobalKey: canvasGlobalKey)
+                // RecordScreen(canvasGlobalKey: canvasGlobalKey)
               ],
             ),
           ],
