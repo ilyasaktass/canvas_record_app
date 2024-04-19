@@ -1,7 +1,6 @@
 import 'dart:ui';
 
 import 'package:canvas_record_app/main.dart';
-import 'package:canvas_record_app/record/record_screen.dart';
 import 'package:canvas_record_app/view/drawing_canvas.dart/drawing_canvas.dart';
 import 'package:canvas_record_app/view/drawing_canvas.dart/models/drawing_mode.dart';
 import 'package:canvas_record_app/view/drawing_canvas.dart/models/sketch.dart';
@@ -9,12 +8,18 @@ import 'package:flutter/material.dart' hide Image;
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter/services.dart';
 
+import 'drawing_canvas.dart/widgets/drawing_side_bar.dart';
+
 class DrawingPage extends HookWidget {
   const DrawingPage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
+        SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.landscapeRight,
+      DeviceOrientation.landscapeLeft,
+    ]);
     final selectedColor = useState(Colors.black);
     final strokeSize = useState<double>(10);
     final eraserSize = useState<double>(30);
@@ -35,115 +40,79 @@ class DrawingPage extends HookWidget {
     final pageWidth = MediaQuery.of(context).size.width;
     final pageHeight = MediaQuery.of(context).size.height;
     const recordPageWidth = 56;
-    final canvasWidth =
-        MediaQuery.of(context).size.width;
+    final canvasWidth = MediaQuery.of(context).size.width;
     final canvasHeight = MediaQuery.of(context).size.height;
     return Scaffold(
-      // appBar: AppBar(
-      //   title: Text('Screen Recording App'),
-      // ),
-      // bottomNavigationBar: BottomNavigationBar(
-      //   items: const <BottomNavigationBarItem>[
-      //     BottomNavigationBarItem(
-      //       icon: Icon(Icons.home),
-      //       label: 'Home',
-      //     ),
-      //     BottomNavigationBarItem(
-      //       icon: Icon(Icons.business),
-      //       label: 'Business',
-      //     ),
-      //     BottomNavigationBarItem(
-      //       icon: Icon(Icons.school),
-      //       label: 'School',
-      //     ),
-      //   ],
-      // ),
-      body: OrientationBuilder(
-        builder: (context, orientation) {
-          if (orientation == Orientation.landscape) {
-            return Row(
-              children: [
-                RecordScreen(
-                  canvasGlobalKey: canvasGlobalKey,
-                  recordPageWidth: recordPageWidth.toDouble(),
-                  pageWidth: pageWidth,
-                  pageHeight: pageHeight,
-                  orientation: orientation,
-                ),
-                Expanded(
-                  child: Container(
-                    color: kCanvasColor,
-                    width: pageWidth,
-                    child: DrawingCanvas(
-                      width: canvasWidth,
-                      height: canvasHeight,
-                      drawingMode: drawingMode,
-                      selectedColor: selectedColor,
-                      strokeSize: strokeSize,
-                      eraserSize: eraserSize,
-                      sideBarController: animationController,
-                      currentSketch: currentSketch,
-                      allSketches: allSketches,
-                      canvasGlobalKey: canvasGlobalKey,
-                      filled: filled,
-                      polygonSides: polygonSides,
-                      backgroundImage: backgroundImage,
-                    ),
-                  ),
-                ),
-              ],
-            );
-          } else {
-            return Column(
-              children: [
-              
-                Expanded(
-                  child: Container(
-                    color: kCanvasColor,
-                    width: pageWidth,
-                    child: DrawingCanvas(
-                      width: canvasWidth,
-                      height: canvasHeight,
-                      drawingMode: drawingMode,
-                      selectedColor: selectedColor,
-                      strokeSize: strokeSize,
-                      eraserSize: eraserSize,
-                      sideBarController: animationController,
-                      currentSketch: currentSketch,
-                      allSketches: allSketches,
-                      canvasGlobalKey: canvasGlobalKey,
-                      filled: filled,
-                      polygonSides: polygonSides,
-                      backgroundImage: backgroundImage,
-                    ),
-                    
-                  ),
-                ),
-                  RecordScreen(
-                  canvasGlobalKey: canvasGlobalKey,
-                  recordPageWidth: recordPageWidth.toDouble(),
-                  pageWidth: pageWidth,
-                  pageHeight: pageHeight,
-                  orientation: orientation,
-                ),
-              ],
-            );
-          }
-        },
-      ),
-          // CanvasSideBar(
-          //       drawingMode: drawingMode,
-          //       selectedColor: selectedColor,
-          //       strokeSize: strokeSize,
-          //       eraserSize: eraserSize,
-          //       currentSketch: currentSketch,
-          //       allSketches: allSketches,
-          //       canvasGlobalKey: canvasGlobalKey,
-          //       filled: filled,
-          //       polygonSides: polygonSides,
-          //       backgroundImage: backgroundImage,
-          //     ),
-      );
+        // appBar: AppBar(
+        //   title: Text('Screen Recording App'),
+        // ),
+        // bottomNavigationBar: BottomNavigationBar(
+        //   items: const <BottomNavigationBarItem>[
+        //     BottomNavigationBarItem(
+        //       icon: Icon(Icons.home),
+        //       label: 'Home',
+        //     ),
+        //     BottomNavigationBarItem(
+        //       icon: Icon(Icons.business),
+        //       label: 'Business',
+        //     ),
+        //     BottomNavigationBarItem(
+        //       icon: Icon(Icons.school),
+        //       label: 'School',
+        //     ),
+        //   ],
+        // ),
+        body: Row(
+      children: [
+       
+        Expanded(
+          child: Container(
+            color: kCanvasColor,
+            width: pageWidth,
+            child: DrawingCanvas(
+              width: canvasWidth,
+              height: canvasHeight,
+              drawingMode: drawingMode,
+              selectedColor: selectedColor,
+              strokeSize: strokeSize,
+              eraserSize: eraserSize,
+              sideBarController: animationController,
+              currentSketch: currentSketch,
+              allSketches: allSketches,
+              canvasGlobalKey: canvasGlobalKey,
+              filled: filled,
+              polygonSides: polygonSides,
+              backgroundImage: backgroundImage,
+            ),
+          ),
+        ),
+         CanvasSideBar(
+          drawingMode: drawingMode,
+          selectedColor: selectedColor,
+          strokeSize: strokeSize,
+          eraserSize: eraserSize,
+          currentSketch: currentSketch,
+          allSketches: allSketches,
+          canvasGlobalKey: canvasGlobalKey,
+          filled: filled,
+          polygonSides: polygonSides,
+          backgroundImage: backgroundImage,
+        ),
+      ],
+    )
+        // CanvasSideBar(
+        //       drawingMode: drawingMode,
+        //       selectedColor: selectedColor,
+        //       strokeSize: strokeSize,
+        //       eraserSize: eraserSize,
+        //       currentSketch: currentSketch,
+        //       allSketches: allSketches,
+        //       canvasGlobalKey: canvasGlobalKey,
+        //       filled: filled,
+        //       polygonSides: polygonSides,
+        //       backgroundImage: backgroundImage,
+        //     ),
+        );
   }
 }
 

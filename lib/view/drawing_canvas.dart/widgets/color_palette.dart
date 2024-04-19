@@ -15,7 +15,7 @@ class ColorPalette extends HookWidget {
     List<Color> colors = [
       Colors.black,
       Colors.white,
-      ...Colors.primaries,
+      ...Colors.primaries.take(2),
     ];
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -24,6 +24,7 @@ class ColorPalette extends HookWidget {
       children: [
         Wrap(
           alignment: WrapAlignment.center,
+          direction: Axis.horizontal,
           spacing: 2,
           runSpacing: 2,
           children: [
@@ -41,42 +42,13 @@ class ColorPalette extends HookWidget {
                         color: selectedColor.value == color
                             ? Colors.blue
                             : Colors.grey,
-                        width: 1.5,
+                        width: selectedColor.value == color ? 3.5 : 1,
                       ),
-                      borderRadius: const BorderRadius.all(Radius.circular(5)),
+                      borderRadius:selectedColor.value == color ? const BorderRadius.all(Radius.circular(5)) :  const BorderRadius.all(Radius.circular(100)),
                     ),
                   ),
                 ),
               ),
-          ],
-        ),
-        const SizedBox(height: 10),
-        Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              height: 30,
-              width: 30,
-              decoration: BoxDecoration(
-                color: selectedColor.value,
-                border: Border.all(color: Colors.blue, width: 1.5),
-                borderRadius: const BorderRadius.all(Radius.circular(5)),
-              ),
-            ),
-            const SizedBox(width: 10),
-            // MouseRegion(
-            //   cursor: SystemMouseCursors.click,
-            //   child: GestureDetector(
-            //     onTap: () {
-            //       showColorWheel(context, selectedColor);
-            //     },
-            //     child: SvgPicture.asset(
-            //       'assets/svgs/color_wheel.svg',
-            //       height: 30,
-            //       width: 30,
-            //     ),
-            //   ),
-            // ),
           ],
         ),
       ],

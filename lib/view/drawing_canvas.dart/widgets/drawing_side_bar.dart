@@ -52,16 +52,16 @@ class CanvasSideBar extends HookWidget {
     );
     final scrollController = useScrollController();
     return Container(
-      width: 300,
-      height: MediaQuery.of(context).size.height < 680 ? 350 : 410,
-      decoration: BoxDecoration(
+      width: 100,
+      height: MediaQuery.of(context).size.height,
+      decoration: const BoxDecoration(
         color: Colors.white,
-        borderRadius: const BorderRadius.horizontal(right: Radius.circular(10)),
+        borderRadius:  BorderRadius.horizontal(right: Radius.circular(10)),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.shade200,
+            color: ui.Color.fromARGB(94, 160, 154, 154),
             blurRadius: 3,
-            offset: const Offset(3, 3),
+            offset:  Offset(3, 3),
           ),
         ],
       ),
@@ -70,74 +70,76 @@ class CanvasSideBar extends HookWidget {
         thumbVisibility: true,
         trackVisibility: true,
         child: ListView(
-          padding: const EdgeInsets.all(10.0),
+          padding: const EdgeInsets.fromLTRB(5, 20, 0, 5),
           controller: scrollController,
+          
           children: [
-            const SizedBox(height: 10),
-            const Text(
-              'Shapes',
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-            const Divider(),
-            Wrap(
-              alignment: WrapAlignment.start,
-              spacing: 5,
-              runSpacing: 5,
+            Column(
               children: [
-                _IconBox(
-                  iconData: FontAwesomeIcons.pencil,
-                  selected: drawingMode.value == DrawingMode.pencil,
-                  onTap: () => drawingMode.value = DrawingMode.pencil,
-                  tooltip: 'Pencil',
-                ),
-                _IconBox(
-                  selected: drawingMode.value == DrawingMode.line,
-                  onTap: () => drawingMode.value = DrawingMode.line,
-                  tooltip: 'Line',
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Container(
-                        width: 22,
-                        height: 2,
-                        color: drawingMode.value == DrawingMode.line
-                            ? Colors.grey[900]
-                            : Colors.grey,
-                      ),
-                    ],
-                  ),
-                ),
-                _IconBox(
-                  iconData: Icons.hexagon_outlined,
-                  selected: drawingMode.value == DrawingMode.polygon,
-                  onTap: () => drawingMode.value = DrawingMode.polygon,
-                  tooltip: 'Polygon',
-                ),
-                _IconBox(
-                  iconData: FontAwesomeIcons.eraser,
-                  selected: drawingMode.value == DrawingMode.eraser,
-                  onTap: () => drawingMode.value = DrawingMode.eraser,
-                  tooltip: 'Eraser',
-                ),
-                _IconBox(
-                  iconData: FontAwesomeIcons.square,
-                  selected: drawingMode.value == DrawingMode.square,
-                  onTap: () => drawingMode.value = DrawingMode.square,
-                  tooltip: 'Square',
-                ),
-                _IconBox(
-                  iconData: FontAwesomeIcons.circle,
-                  selected: drawingMode.value == DrawingMode.circle,
-                  onTap: () => drawingMode.value = DrawingMode.circle,
-                  tooltip: 'Circle',
+                
+                Wrap(
+                  alignment: WrapAlignment.center,
+                  direction: Axis.horizontal,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  spacing: 5,
+                  runSpacing: 5,
+                  children: [
+                    _IconBox(
+                      iconData: FontAwesomeIcons.pencil,
+                      selected: drawingMode.value == DrawingMode.pencil,
+                      onTap: () => drawingMode.value = DrawingMode.pencil,
+                      tooltip: 'Pencil',
+                    ),
+                    // _IconBox(
+                    //   selected: drawingMode.value == DrawingMode.line,
+                    //   onTap: () => drawingMode.value = DrawingMode.line,
+                    //   tooltip: 'Line',
+                    //   child: Column(
+                    //     mainAxisAlignment: MainAxisAlignment.center,
+                    //     children: [
+                    //       Container(
+                    //         width: 22,
+                    //         height: 2,
+                    //         color: drawingMode.value == DrawingMode.line
+                    //             ? Colors.grey[900]
+                    //             : Colors.grey,
+                    //       ),
+                    //     ],
+                    //   ),
+                    // ),
+                    // _IconBox(
+                    //   iconData: Icons.hexagon_outlined,
+                    //   selected: drawingMode.value == DrawingMode.polygon,
+                    //   onTap: () => drawingMode.value = DrawingMode.polygon,
+                    //   tooltip: 'Polygon',
+                    // ),
+                    _IconBox(
+                      iconData: FontAwesomeIcons.eraser,
+                      selected: drawingMode.value == DrawingMode.eraser,
+                      onTap: () => drawingMode.value = DrawingMode.eraser,
+                      tooltip: 'Eraser',
+                    ),
+                    _IconBox(
+                      iconData: FontAwesomeIcons.square,
+                      selected: drawingMode.value == DrawingMode.square,
+                      onTap: () => drawingMode.value = DrawingMode.square,
+                      tooltip: 'Square',
+                    ),
+                    _IconBox(
+                      iconData: FontAwesomeIcons.circle,
+                      selected: drawingMode.value == DrawingMode.circle,
+                      onTap: () => drawingMode.value = DrawingMode.circle,
+                      tooltip: 'Circle',
+                    ),
+                  ],
                 ),
               ],
             ),
-            const SizedBox(height: 8),
-            Row(
+            const SizedBox(height: 5),
+            Column(
               children: [
                 const Text(
-                  'Fill Shape: ',
+                  'Fill Shape',
                   style: TextStyle(fontSize: 12),
                 ),
                 Checkbox(
@@ -151,7 +153,7 @@ class CanvasSideBar extends HookWidget {
             AnimatedSwitcher(
               duration: const Duration(milliseconds: 150),
               child: drawingMode.value == DrawingMode.polygon
-                  ? Row(
+                  ? Column(
                       children: [
                         const Text(
                           'Polygon Sides: ',
@@ -166,46 +168,39 @@ class CanvasSideBar extends HookWidget {
                           },
                           label: '${polygonSides.value}',
                           divisions: 5,
+                          
                         ),
                       ],
                     )
                   : const SizedBox.shrink(),
             ),
-            const SizedBox(height: 10),
-            const Text(
-              'Colors',
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
+            const SizedBox(height: 5),
             const Divider(),
             ColorPalette(
               selectedColor: selectedColor,
             ),
-            const SizedBox(height: 20),
-            const Text(
-              'Size',
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
+            const SizedBox(height: 5),
             const Divider(),
-            Row(
+            Column(
               children: [
                 const Text(
-                  'Stroke Size: ',
+                  'Stroke Size',
                   style: TextStyle(fontSize: 12),
                 ),
                 Slider(
                   value: strokeSize.value,
                   min: 0,
-                  max: 50,
+                  max: 100,
                   onChanged: (val) {
                     strokeSize.value = val;
                   },
                 ),
               ],
             ),
-            Row(
+            Column(
               children: [
                 const Text(
-                  'Eraser Size: ',
+                  'Eraser Size',
                   style: TextStyle(fontSize: 12),
                 ),
                 Slider(
@@ -218,49 +213,49 @@ class CanvasSideBar extends HookWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 20),
-            const Text(
-              'Actions',
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
+            const SizedBox(height: 5),
             const Divider(),
-            Wrap(
+            Column(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                TextButton(
-                  onPressed: allSketches.value.isNotEmpty
-                      ? () => undoRedoStack.value.undo()
-                      : null,
-                  child: const Text('Undo'),
+                Wrap(
+                  direction: Axis.vertical,
+                  alignment: WrapAlignment.center,
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.undo),
+                      onPressed: allSketches.value.isNotEmpty
+                        ? () => undoRedoStack.value.undo()
+                        : null,
+                    ),
+                    ValueListenableBuilder<bool>(
+                      valueListenable: undoRedoStack.value._canRedo,
+                      builder: (_, canRedo, __) {
+                        return IconButton(
+                          onPressed:
+                              canRedo ? () => undoRedoStack.value.redo() : null,
+                          icon: const Icon(Icons.redo),
+                        );
+                      },
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.delete),
+                      onPressed: () => undoRedoStack.value.clear(),
+                    ),
+                    IconButton(
+                      onPressed: () async {
+                        backgroundImage.value = await _getImage;
+                      },
+                      icon: const Icon(
+                        Icons.add_photo_alternate
+                      ),
+                     
+                    ),
+                    // RecordScreen(canvasGlobalKey: canvasGlobalKey)
+                  ],
                 ),
-                ValueListenableBuilder<bool>(
-                  valueListenable: undoRedoStack.value._canRedo,
-                  builder: (_, canRedo, __) {
-                    return TextButton(
-                      onPressed:
-                          canRedo ? () => undoRedoStack.value.redo() : null,
-                      child: const Text('Redo'),
-                    );
-                  },
-                ),
-                TextButton(
-                  child: const Text('Clear'),
-                  onPressed: () => undoRedoStack.value.clear(),
-                ),
-                TextButton(
-                  onPressed: () async {
-                    if (backgroundImage.value != null) {
-                      backgroundImage.value = null;
-                    } else {
-                      backgroundImage.value = await _getImage;
-                    }
-                  },
-                  child: Text(
-                    backgroundImage.value == null
-                        ? 'Add Background'
-                        : 'Remove Background',
-                  ),
-                ),
-                // RecordScreen(canvasGlobalKey: canvasGlobalKey)
+                const Divider(),
+                RecordScreen(canvasGlobalKey: canvasGlobalKey)
               ],
             ),
           ],
@@ -368,14 +363,14 @@ class _IconBox extends StatelessWidget {
       child: GestureDetector(
         onTap: onTap,
         child: Container(
-          height: 35,
-          width: 35,
+          height: 25,
+          width: 25,
           decoration: BoxDecoration(
             border: Border.all(
               color: selected ? Colors.grey[900]! : Colors.grey,
               width: 1.5,
             ),
-            borderRadius: const BorderRadius.all(Radius.circular(5)),
+            borderRadius: const BorderRadius.all(Radius.circular(100)),
           ),
           child: Tooltip(
             message: tooltip,
@@ -384,7 +379,7 @@ class _IconBox extends StatelessWidget {
                 Icon(
                   iconData,
                   color: selected ? Colors.grey[900] : Colors.grey,
-                  size: 20,
+                  size: 14,
                 ),
           ),
         ),

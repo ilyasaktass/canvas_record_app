@@ -40,7 +40,7 @@ class DrawingCanvas extends HookWidget {
   }) : super(key: key);
 
   @override
-Widget build(BuildContext context) {
+  Widget build(BuildContext context) {
     return MouseRegion(
       cursor: SystemMouseCursors.precise,
       child: Stack(
@@ -58,7 +58,6 @@ Widget build(BuildContext context) {
       ),
     );
   }
-
 
   void onPointerDown(PointerDownEvent details, BuildContext context) {
     final box = context.findRenderObject() as RenderBox;
@@ -79,35 +78,46 @@ Widget build(BuildContext context) {
       filled.value,
     );
   }
-bool _isInsideCanvas(Offset offset) {
-  if (0 <= offset.dx && offset.dx <= width && 0 <= offset.dy && offset.dy <= height) {
-    return true;
+
+  bool _isInsideCanvas(Offset offset) {
+    if (0 <= offset.dx &&
+        offset.dx <= width &&
+        0 <= offset.dy &&
+        offset.dy <= height) {
+      return true;
+    }
+    return false;
   }
-  return false;
-}
-void onPointerMove(PointerMoveEvent details, BuildContext context) {
-  final box = context.findRenderObject() as RenderBox;
-  final offset = box.globalToLocal(details.position);
-  if (!_isInsideCanvas(offset)) return;
 
-  // Get the drawing points
-  final points = List<Offset>.from(currentSketch.value?.points ?? [])..add(offset);
+  void onPointerMove(PointerMoveEvent details, BuildContext context) {
+    final box = context.findRenderObject() as RenderBox;
+    final offset = box.globalToLocal(details.position);
+    if (!_isInsideCanvas(offset)) return;
 
-  // If the new point exceeds the canvas boundaries or underflows, exit without doing the next operations
-  if (!_isInsideCanvas(points.last)) return;
+    // Get the drawing points
+    final points = List<Offset>.from(currentSketch.value?.points ?? [])
+      ..add(offset);
 
-  // Update the new drawing points
-  currentSketch.value = Sketch.fromDrawingMode(
-    Sketch(
-      points: points,
-      size: drawingMode.value == DrawingMode.eraser ? eraserSize.value : strokeSize.value,
-      color: drawingMode.value == DrawingMode.eraser ? kCanvasColor : selectedColor.value,
-      sides: polygonSides.value,
-    ),
-    drawingMode.value,
-    filled.value,
-  );
-}
+    // If the new point exceeds the canvas boundaries or underflows, exit without doing the next operations
+    if (!_isInsideCanvas(points.last)) return;
+
+    // Update the new drawing points
+    currentSketch.value = Sketch.fromDrawingMode(
+      Sketch(
+        points: points,
+        size: drawingMode.value == DrawingMode.eraser
+            ? eraserSize.value
+            : strokeSize.value,
+        color: drawingMode.value == DrawingMode.eraser
+            ? kCanvasColor
+            : selectedColor.value,
+        sides: polygonSides.value,
+      ),
+      drawingMode.value,
+      filled.value,
+    );
+  }
+
   void onPointerUp(PointerUpEvent details) {
     allSketches.value = List<Sketch>.from(allSketches.value)
       ..add(currentSketch.value!);
@@ -131,13 +141,11 @@ void onPointerMove(PointerMoveEvent details, BuildContext context) {
     return SizedBox(
       height: height,
       width: width,
-      
       child: ValueListenableBuilder<List<Sketch>>(
         valueListenable: allSketches,
         builder: (context, sketches, _) {
           return RepaintBoundary(
             key: canvasGlobalKey,
-            
             child: Container(
               child: CustomPaint(
                 painter: SketchPainter(
@@ -190,17 +198,41 @@ class SketchPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     if (backgroundImage != null) {
-      canvas.drawImageRect(
-        backgroundImage!,
-        Rect.fromLTWH(
-          0,
-          0,
-          backgroundImage!.width.toDouble(),
-          backgroundImage!.height.toDouble(),
-        ),
-        Rect.fromLTWH(0, 0, size.width, size.height),
-        Paint(),
-      );
+     // Define the shadow color, offset, and blur radius
+    const shadowColor = Colors.black38;
+    const shadowOffset = Offset(10, 10);
+    const shadowBlurRadius = 20.0;
+
+    // Define the image rect
+    final imageRect = Rect.fromLTWH(
+      10,
+      40,
+      size.width / 2,
+      size.height / 2,
+    );
+
+    // Draw the shadow
+    canvas.drawShadow(
+      Path()..addRect(imageRect),
+      shadowColor,
+      shadowBlurRadius,
+      false,
+    );
+
+    // Draw the image
+    canvas.drawImageRect(
+      backgroundImage!,
+      Rect.fromLTWH(
+        0,
+        0,
+        backgroundImage!.width.toDouble(),
+        backgroundImage!.height.toDouble(),
+      ),
+      imageRect,
+      Paint(),
+    );
+    // resmi sürükleyebilmek için DraggableImage widget'ını çağırıyoruz ama şimdilik çalışmıyor
+    //DraggableImage(image: backgroundImage!);
     }
     for (Sketch sketch in sketches) {
       final points = sketch.points;
@@ -293,5 +325,33 @@ class SketchPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant SketchPainter oldDelegate) {
     return oldDelegate.sketches != sketches;
+  }
+}
+class DraggableImage extends StatefulWidget {
+  final Image image;
+
+  DraggableImage({required this.image});
+
+  @override
+  _DraggableImageState createState() => _DraggableImageState();
+}
+
+class _DraggableImageState extends State<DraggableImage> {
+  Offset position = Offset.zero;
+
+  @override
+  Widget build(BuildContext context) {
+    return Positioned(
+      left: position.dx,
+      top: position.dy,
+      child: GestureDetector(
+        onPanUpdate: (details) {
+          setState(() {
+            position = position + details.delta;
+          });
+        },
+        child: widget.image as Widget? ?? Container(),
+      ),
+    );
   }
 }
