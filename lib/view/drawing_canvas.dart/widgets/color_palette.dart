@@ -15,7 +15,7 @@ class ColorPalette extends HookWidget {
     List<Color> colors = [
       Colors.black,
       Colors.white,
-      ...Colors.primaries.take(2),
+      ...Colors.primaries.take(4),
     ];
     return Column(
       mainAxisSize: MainAxisSize.min,

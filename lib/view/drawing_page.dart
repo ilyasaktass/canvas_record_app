@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:canvas_record_app/loader/loader_screen.dart';
 import 'package:canvas_record_app/main.dart';
 import 'package:canvas_record_app/view/drawing_canvas.dart/drawing_canvas.dart';
 import 'package:canvas_record_app/view/drawing_canvas.dart/models/drawing_mode.dart';
@@ -27,6 +28,7 @@ class DrawingPage extends HookWidget {
     final filled = useState<bool>(false);
     final polygonSides = useState<int>(3);
     final backgroundImage = useState<Image?>(null);
+    final zoomMode = useState<bool>(false);
 
     final canvasGlobalKey = GlobalKey();
     ;
@@ -37,15 +39,16 @@ class DrawingPage extends HookWidget {
       duration: const Duration(milliseconds: 150),
       initialValue: 1,
     );
+    const double sidebarWidth = 110;
     final pageWidth = MediaQuery.of(context).size.width;
-    final pageHeight = MediaQuery.of(context).size.height;
-    const recordPageWidth = 56;
-    final canvasWidth = MediaQuery.of(context).size.width;
+    final canvasWidth = MediaQuery.of(context).size.width - sidebarWidth;
     final canvasHeight = MediaQuery.of(context).size.height;
+    
     return Scaffold(
-        // appBar: AppBar(
-        //   title: Text('Screen Recording App'),
-        // ),
+        appBar: AppBar(
+          toolbarHeight: kToolbarHeight,
+          title: Text('Screen Recording App'),
+        ),
         // bottomNavigationBar: BottomNavigationBar(
         //   items: const <BottomNavigationBarItem>[
         //     BottomNavigationBarItem(
@@ -64,7 +67,6 @@ class DrawingPage extends HookWidget {
         // ),
         body: Row(
       children: [
-       
         Expanded(
           child: Container(
             color: kCanvasColor,
@@ -76,6 +78,7 @@ class DrawingPage extends HookWidget {
               selectedColor: selectedColor,
               strokeSize: strokeSize,
               eraserSize: eraserSize,
+              
               sideBarController: animationController,
               currentSketch: currentSketch,
               allSketches: allSketches,
@@ -97,6 +100,7 @@ class DrawingPage extends HookWidget {
           filled: filled,
           polygonSides: polygonSides,
           backgroundImage: backgroundImage,
+          width:sidebarWidth
         ),
       ],
     )

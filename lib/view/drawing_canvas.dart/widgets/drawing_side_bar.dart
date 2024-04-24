@@ -27,6 +27,7 @@ class CanvasSideBar extends HookWidget {
   final ValueNotifier<bool> filled;
   final ValueNotifier<int> polygonSides;
   final ValueNotifier<ui.Image?> backgroundImage;
+  final double width;
 
   const CanvasSideBar({
     Key? key,
@@ -40,6 +41,7 @@ class CanvasSideBar extends HookWidget {
     required this.filled,
     required this.polygonSides,
     required this.backgroundImage,
+    required this.width,
   }) : super(key: key);
 
   @override
@@ -52,14 +54,14 @@ class CanvasSideBar extends HookWidget {
     );
     final scrollController = useScrollController();
     return Container(
-      width: 100,
+      width: width,
       height: MediaQuery.of(context).size.height,
       decoration: const BoxDecoration(
         color: Colors.white,
         borderRadius:  BorderRadius.horizontal(right: Radius.circular(10)),
         boxShadow: [
           BoxShadow(
-            color: ui.Color.fromARGB(94, 160, 154, 154),
+            color: ui.Color.fromARGB(94, 124, 6, 6),
             blurRadius: 3,
             offset:  Offset(3, 3),
           ),
@@ -75,10 +77,9 @@ class CanvasSideBar extends HookWidget {
           
           children: [
             Column(
-              children: [
-                
+              children: [                
                 Wrap(
-                  alignment: WrapAlignment.center,
+                  alignment: WrapAlignment.start,
                   direction: Axis.horizontal,
                   crossAxisAlignment: WrapCrossAlignment.center,
                   spacing: 5,
@@ -90,29 +91,29 @@ class CanvasSideBar extends HookWidget {
                       onTap: () => drawingMode.value = DrawingMode.pencil,
                       tooltip: 'Pencil',
                     ),
-                    // _IconBox(
-                    //   selected: drawingMode.value == DrawingMode.line,
-                    //   onTap: () => drawingMode.value = DrawingMode.line,
-                    //   tooltip: 'Line',
-                    //   child: Column(
-                    //     mainAxisAlignment: MainAxisAlignment.center,
-                    //     children: [
-                    //       Container(
-                    //         width: 22,
-                    //         height: 2,
-                    //         color: drawingMode.value == DrawingMode.line
-                    //             ? Colors.grey[900]
-                    //             : Colors.grey,
-                    //       ),
-                    //     ],
-                    //   ),
-                    // ),
-                    // _IconBox(
-                    //   iconData: Icons.hexagon_outlined,
-                    //   selected: drawingMode.value == DrawingMode.polygon,
-                    //   onTap: () => drawingMode.value = DrawingMode.polygon,
-                    //   tooltip: 'Polygon',
-                    // ),
+                    _IconBox(
+                      selected: drawingMode.value == DrawingMode.line,
+                      onTap: () => drawingMode.value = DrawingMode.line,
+                      tooltip: 'Line',
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Container(
+                            width: 22,
+                            height: 2,
+                            color: drawingMode.value == DrawingMode.line
+                                ? Colors.grey[900]
+                                : Colors.grey,
+                          ),
+                        ],
+                      ),
+                    ),
+                    _IconBox(
+                      iconData: Icons.hexagon_outlined,
+                      selected: drawingMode.value == DrawingMode.polygon,
+                      onTap: () => drawingMode.value = DrawingMode.polygon,
+                      tooltip: 'Polygon',
+                    ),
                     _IconBox(
                       iconData: FontAwesomeIcons.eraser,
                       selected: drawingMode.value == DrawingMode.eraser,
@@ -219,7 +220,7 @@ class CanvasSideBar extends HookWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Wrap(
-                  direction: Axis.vertical,
+                  direction: Axis.horizontal,
                   alignment: WrapAlignment.center,
                   children: [
                     IconButton(
