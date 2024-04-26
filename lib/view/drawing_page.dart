@@ -1,6 +1,4 @@
 import 'dart:ui';
-
-import 'package:canvas_record_app/loader/loader_screen.dart';
 import 'package:canvas_record_app/main.dart';
 import 'package:canvas_record_app/view/drawing_canvas.dart/drawing_canvas.dart';
 import 'package:canvas_record_app/view/drawing_canvas.dart/models/drawing_mode.dart';

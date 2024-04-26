@@ -11,9 +11,9 @@ import 'package:ffmpeg_kit_flutter/ffmpeg_kit.dart';
 
 class RecordScreen extends StatefulWidget {
   const RecordScreen({
-    Key? key,
+    super.key,
     required this.canvasGlobalKey,
-  }) : super(key: key);
+  });
 
   final GlobalKey canvasGlobalKey;
 
@@ -48,7 +48,6 @@ class _RecordScreenState extends State<RecordScreen> {
 
   void stopTimer() {
     _timer?.cancel();
-
   }
 
   Future<void> startRecord({required int width, required int height}) async {
@@ -90,8 +89,13 @@ class _RecordScreenState extends State<RecordScreen> {
         Directory? directory = await getExternalStorageDirectory();
         final String outputPath = '${directory!.path}/$_fileName.mp4';
         double cropY = kToolbarHeight;
-        double cropWidth = MediaQuery.of(context).size.width - 100;
-        double cropHeight = MediaQuery.of(context).size.height - cropY;
+        double cropWidth = 0;
+        double cropHeight = 0;
+        if (mounted) {
+          cropWidth = MediaQuery.of(context).size.width - 100;
+          cropHeight = MediaQuery.of(context).size.height - cropY;
+        }
+
         cropVideo(file.path, outputPath, cropWidth.toInt(), cropHeight.toInt(),
             0, cropY);
       } else {
@@ -128,7 +132,6 @@ class _RecordScreenState extends State<RecordScreen> {
 
   void cropVideo(String inputPath, String outputPath, int cropWidth,
       int cropHeight, int videoCropX, double videoCropY) async {
-        
     final String cropCommand =
         "-i $inputPath -vf \"crop=$cropWidth:$cropHeight:$videoCropX:$videoCropY\" -c:a copy $outputPath";
 
@@ -167,8 +170,8 @@ class _RecordScreenState extends State<RecordScreen> {
             color: Colors.red,
             tooltip: 'Start Recording',
           ),
-           Text(
-          "${Duration(seconds: _start).inMinutes.remainder(60).toString().padLeft(2, '0')}:${(Duration(seconds: _start).inSeconds.remainder(60)).toString().padLeft(2, '0')}"),
+        Text(
+            "${Duration(seconds: _start).inMinutes.remainder(60).toString().padLeft(2, '0')}:${(Duration(seconds: _start).inSeconds.remainder(60)).toString().padLeft(2, '0')}"),
         if (isRecording) ...[
           IconButton(
             onPressed: () => pauseRecord(),
@@ -195,7 +198,6 @@ class _RecordScreenState extends State<RecordScreen> {
             color: Colors.red,
             tooltip: 'Stop',
           ),
-         
         ]
       ],
     );

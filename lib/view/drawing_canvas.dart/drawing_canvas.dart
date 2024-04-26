@@ -1,10 +1,11 @@
 import 'dart:math' as math;
-import 'dart:ui';
-
+import 'dart:ui' as ui;
+import 'package:flutter/material.dart' hide Image;
+import 'package:canvas_record_app/image_component/image_screen.dart';
 import 'package:canvas_record_app/main.dart';
 import 'package:canvas_record_app/view/drawing_canvas.dart/models/drawing_mode.dart';
 import 'package:canvas_record_app/view/drawing_canvas.dart/models/sketch.dart';
-import 'package:flutter/material.dart' hide Image;
+import 'package:flutter/widgets.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 
 class DrawingCanvas extends HookWidget {
@@ -12,7 +13,7 @@ class DrawingCanvas extends HookWidget {
   final double width;
   final ValueNotifier<Color> selectedColor;
   final ValueNotifier<double> strokeSize;
-  final ValueNotifier<Image?> backgroundImage;
+  final ValueNotifier<ui.Image?> backgroundImage;
   final ValueNotifier<double> eraserSize;
   final ValueNotifier<DrawingMode> drawingMode;
   final AnimationController sideBarController;
@@ -146,13 +147,12 @@ class DrawingCanvas extends HookWidget {
         builder: (context, sketches, _) {
           return RepaintBoundary(
             key: canvasGlobalKey,
-            child: Container(
-              child: CustomPaint(
-                painter: SketchPainter(
-                  sketches: sketches,
-                  backgroundImage: backgroundImage.value,
-                ),
+            child: CustomPaint(
+              painter:SketchPainter(
+                sketches: sketches,
+                backgroundImage: backgroundImage.value,
               ),
+               
             ),
           );
         },
@@ -187,7 +187,7 @@ class DrawingCanvas extends HookWidget {
 
 class SketchPainter extends CustomPainter {
   final List<Sketch> sketches;
-  final Image? backgroundImage;
+  final ui.Image? backgroundImage;
 
   const SketchPainter({
     Key? key,
@@ -197,43 +197,134 @@ class SketchPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
+     // Arka plan resmini çiz
     if (backgroundImage != null) {
-     // Define the shadow color, offset, and blur radius
-    const shadowColor = Colors.black38;
-    const shadowOffset = Offset(10, 10);
-    const shadowBlurRadius = 20.0;
+      paintBackgroundImage(canvas, size);
+    }
+    for (Sketch sketch in sketches) {
+      final points = sketch.points;
+      if (points.isEmpty) return;
 
-    // Define the image rect
-    final imageRect = Rect.fromLTWH(
-      10,
-      40,
-      size.width / 2,
-      size.height / 2,
-    );
+      final path = Path();
 
-    // Draw the shadow
-    canvas.drawShadow(
-      Path()..addRect(imageRect),
-      shadowColor,
-      shadowBlurRadius,
-      false,
-    );
+      path.moveTo(points[0].dx, points[0].dy);
+      if (points.length < 2) {
+        // If the path only has one line, draw a dot.
+        path.addOval(
+          Rect.fromCircle(
+            center: Offset(points[0].dx, points[0].dy),
+            radius: 1,
+          ),
+        );
+      }
 
-    // Draw the image
+      for (int i = 1; i < points.length - 1; ++i) {
+        final p0 = points[i];
+        final p1 = points[i + 1];
+        path.quadraticBezierTo(
+          p0.dx,
+          p0.dy,
+          (p0.dx + p1.dx) / 2,
+          (p0.dy + p1.dy) / 2,
+        );
+      }
+
+      Paint paint = Paint()
+        ..color = sketch.color
+        ..strokeCap = StrokeCap.round;
+
+
+      if (!sketch.filled) {
+        paint.style = PaintingStyle.stroke;
+        paint.strokeWidth = sketch.size;
+      }
+
+      // define first and last points for convenience
+      Offset firstPoint = sketch.points.first;
+      Offset lastPoint = sketch.points.last;
+
+      // create rect to use rectangle and circle
+      Rect rect = Rect.fromPoints(firstPoint, lastPoint);
+
+      // Calculate center point from the first and last points
+      Offset centerPoint = (firstPoint / 2) + (lastPoint / 2);
+
+      // Calculate path's radius from the first and last points
+      double radius = (firstPoint - lastPoint).distance / 2;
+
+      if (sketch.type == SketchType.scribble) {
+        canvas.drawPath(path, paint);
+      } else if (sketch.type == SketchType.square) {
+        canvas.drawRRect(
+          RRect.fromRectAndRadius(rect, const Radius.circular(5)),
+          paint,
+        );
+      } else if (sketch.type == SketchType.line) {
+        canvas.drawLine(firstPoint, lastPoint, paint);
+      } else if (sketch.type == SketchType.circle) {
+        canvas.drawOval(rect, paint);
+        // Uncomment this line if you need a PERFECT CIRCLE
+        // canvas.drawCircle(centerPoint, radius , paint);
+      } else if (sketch.type == SketchType.polygon) {
+        Path polygonPath = Path();
+        int sides = sketch.sides;
+        var angle = (math.pi * 2) / sides;
+
+        double radian = 0.0;
+
+        Offset startPoint =
+            Offset(radius * math.cos(radian), radius * math.sin(radian));
+
+        polygonPath.moveTo(
+          startPoint.dx + centerPoint.dx,
+          startPoint.dy + centerPoint.dy,
+        );
+        for (int i = 1; i <= sides; i++) {
+          double x = radius * math.cos(radian + angle * i) + centerPoint.dx;
+          double y = radius * math.sin(radian + angle * i) + centerPoint.dy;
+          polygonPath.lineTo(x, y);
+        }
+        polygonPath.close();
+        canvas.drawPath(polygonPath, paint);
+      }
+
+       // Silgi işlevi uygulandıktan sonra, katmanı geri yükle
+      //canvas.restore();
+    }
+  }
+
+  void paintBackgroundImage(Canvas canvas, Size size) {
     canvas.drawImageRect(
       backgroundImage!,
-      Rect.fromLTWH(
-        0,
-        0,
-        backgroundImage!.width.toDouble(),
-        backgroundImage!.height.toDouble(),
-      ),
-      imageRect,
+      Rect.fromLTWH(0, 0, backgroundImage!.width.toDouble(),
+          backgroundImage!.height.toDouble()),
+      Rect.fromLTWH(0, 0, size.width, size.height),
       Paint(),
     );
-    // resmi sürükleyebilmek için DraggableImage widget'ını çağırıyoruz ama şimdilik çalışmıyor
-    //DraggableImage(image: backgroundImage!);
-    }
+  }
+
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate) {
+     return oldDelegate != this;
+  }
+}
+
+class MyBackgroundPainter extends CustomPainter {
+  final List<Sketch> sketches;
+  final ui.Image? backgroundImage;
+
+  const MyBackgroundPainter({
+    Key? key,
+    this.backgroundImage,
+    required this.sketches,
+  });
+
+ @override
+  void paint(Canvas canvas, Size size) {
+    // // Arka plan resmini çiz
+    // if (backgroundImage != null) {
+    //   paintBackgroundImage(canvas, size);
+    // }
     for (Sketch sketch in sketches) {
       final points = sketch.points;
       if (points.isEmpty) return;
@@ -319,39 +410,25 @@ class SketchPainter extends CustomPainter {
         polygonPath.close();
         canvas.drawPath(polygonPath, paint);
       }
+
+       // Silgi işlevi uygulandıktan sonra, katmanı geri yükle
+      //canvas.restore();
     }
   }
 
-  @override
-  bool shouldRepaint(covariant SketchPainter oldDelegate) {
-    return oldDelegate.sketches != sketches;
-  }
-}
-class DraggableImage extends StatefulWidget {
-  final Image image;
-
-  DraggableImage({required this.image});
-
-  @override
-  _DraggableImageState createState() => _DraggableImageState();
-}
-
-class _DraggableImageState extends State<DraggableImage> {
-  Offset position = Offset.zero;
-
-  @override
-  Widget build(BuildContext context) {
-    return Positioned(
-      left: position.dx,
-      top: position.dy,
-      child: GestureDetector(
-        onPanUpdate: (details) {
-          setState(() {
-            position = position + details.delta;
-          });
-        },
-        child: widget.image as Widget? ?? Container(),
-      ),
+  void paintBackgroundImage(Canvas canvas, Size size) {
+    canvas.drawImageRect(
+      backgroundImage!,
+      Rect.fromLTWH(0, 0, backgroundImage!.width.toDouble(),
+          backgroundImage!.height.toDouble()),
+      Rect.fromLTWH(0, 0, size.width, size.height),
+      Paint(),
     );
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) {
+    // Eğer arka plan resmi değişirse, yeniden çizilmesi gerektiğini belirt
+    return oldDelegate != this;
   }
 }

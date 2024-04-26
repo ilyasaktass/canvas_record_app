@@ -6,9 +6,9 @@ class ColorPalette extends HookWidget {
   final ValueNotifier<Color> selectedColor;
 
   const ColorPalette({
-    Key? key,
+    super.key,
     required this.selectedColor,
-  }) : super(key: key);
+  }) ;
 
   @override
   Widget build(BuildContext context) {
